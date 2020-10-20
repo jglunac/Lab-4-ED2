@@ -10,16 +10,20 @@ namespace TestConsole
     {
         static void Main(string[] args)
         {
-            string path = @"C:\Users\brazi\Desktop\hola.txt";
-            string path2 = @"C:\Users\brazi\Desktop\comprimidowe.txt";
+            string path = @"C:\Users\joseg\Desktop\hola.txt";
+            string path2 = @"C:\Users\joseg\Desktop\comprimidowe.txt";
             LZW compression = new LZW(path);
-            byte[] FileData = compression.Compress();
+            byte[] FileData = compression.Compress(path,"hola", 100);
 
-            string res = Encoding.ASCII.GetString(FileData);
-            for (int i = 0; i < res.Length; i++)
+            //string res = Encoding.ASCII.GetString(FileData);
+            //for (int i = 0; i < res.Length; i++)
+            //{
+            //    char aux = res[i];
+            //}   
+            using (FileStream fs = File.Create(path2))
             {
-                char aux = res[i];
-            }   
+                fs.Write(FileData);
+            }
         }
     }
 }

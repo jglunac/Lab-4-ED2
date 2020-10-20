@@ -6,7 +6,7 @@ using System.Text;
 using HuffmanCompression;
 namespace LZWCompression
 {
-    public class LZW : ICompression
+    public class LZW : IComp
     {
         #region Properties
         string Path;
@@ -15,6 +15,7 @@ namespace LZWCompression
         List<byte> FinalBytes = new List<byte>();
         int IDBits = 0;
         Queue<int> IDqueue;
+        int DifferentCharacters;
         #endregion
 
         #region Constructor
@@ -179,11 +180,58 @@ namespace LZWCompression
         #region Decompress
         public byte[] Decompress(string path, int buffer)
         {
-            return null;
+            int ContinuePoint = GetDifferentCharacters(path);
+            GenerateTable(ContinuePoint, path);
         }
 
+        int GetDifferentCharacters(string path)
+        {
+            int toReturnPoint = 0;
+            using (FileStream fs = File.OpenRead(path))
+            {
+                using (BinaryReader reader = new BinaryReader(fs))
+                {
+                    DifferentCharacters = Convert.ToInt32(reader.ReadByte());
+                    toReturnPoint++;
+                    for (int i = 0; i < DifferentCharacters; i++)
+                    {
+                        Characters.Add(Convert.ToString(reader.ReadByte()), i + 1);
+                        toReturnPoint++;
+                    }
+                }
+            }
+            return toReturnPoint;
+        }
+        void GenerateTable(int fromHere, string path)
+        {
+            int counter = 0;
+            string PrevCadena;
+            string ActualCadena = "";
+            using (FileStream fs = File.OpenRead(path))
+            {
+                using (BinaryReader reader = new BinaryReader(fs))
+                {
+                    counter += fromHere;
+                    reader.ReadBytes(fromHere);
+                    while (counter < fs.Length)
+                    {
+                        //¿Como puedo obtener los char usando los valores de los números de la tabla
+                        //si pusiste la llave como el propio string?
+                        //ActualCadena = Characters.TryGetValue()
+
+                        //if (Characters.ContainsKey(ActualCadena))
+                        //{
+                        //    FinalBytes.Add(Convert.ToByte(Characters.TryGetValue(ActualCadena)))
+                        //}
+                    }
+                }
+            }
 
 
+
+
+
+        }
         #endregion
     }
 }

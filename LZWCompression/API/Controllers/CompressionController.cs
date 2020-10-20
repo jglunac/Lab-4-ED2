@@ -53,7 +53,7 @@ namespace API.Controllers
                     stream.Close();
                 }
                 LZW compressor = new LZW(path + @"\Uploads\" + originalName);
-                byte[] ByteArray = compressor.Compress();
+                byte[] ByteArray = compressor.Compress(path + @"\Uploads\" + originalName, originalName, 100);
                 originalSize = Memory.Length;
                 double compressedSize = ByteArray.Length;
                 CustomFile result = new CustomFile();
