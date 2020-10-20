@@ -2,7 +2,7 @@
 
 namespace LZWCompression
 {
-    public interface ICompression
+    public interface IComp
     {
         public byte[] Compress();
         public byte[] Decompress();
