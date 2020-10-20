@@ -6,7 +6,7 @@ using System.Text;
 
 namespace LZWCompression
 {
-    public class LZW : ICompression
+    public class LZW : IComp
     {
         #region Properties
         string Path;
