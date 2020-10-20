@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-
+using HuffmanCompression;
 namespace LZWCompression
 {
-    public class LZW : IComp
+    public class LZW : ICompression
     {
         #region Properties
         string Path;
@@ -25,7 +25,7 @@ namespace LZWCompression
         #endregion
 
         #region Compress
-        public byte[] Compress()
+        public byte[] Compress(string path, string FileName, int bSize)
         {
             IDqueue = new Queue<int>();
             GetOriginalCharacters();
@@ -177,7 +177,7 @@ namespace LZWCompression
         #endregion
 
         #region Decompress
-        public byte[] Decompress()
+        public byte[] Decompress(string path, int buffer)
         {
             return null;
         }
