@@ -6,16 +6,18 @@ using System.Text;
 using HuffmanCompression;
 namespace LZWCompression
 {
-    public class LZW : IComp
+    public class LZW : ICompression
     {
         #region Properties
         string Path;
         //El diccionario puede ser <string, int>?
         Dictionary<string, int> Characters = new Dictionary<string, int>();
+        Dictionary<int, string> DecompressedCharacters = new Dictionary<int, string>();
         List<byte> FinalBytes = new List<byte>();
         int IDBits = 0;
         Queue<int> IDqueue;
         int DifferentCharacters;
+        int bSize;
         #endregion
 
         #region Constructor
@@ -180,7 +182,9 @@ namespace LZWCompression
         #region Decompress
         public byte[] Decompress(string path, int buffer)
         {
+
             int ContinuePoint = GetDifferentCharacters(path);
+            FillIDQueue(ContinuePoint, path);
             GenerateTable(ContinuePoint, path);
             return FinalBytes.ToArray();
         }
@@ -192,11 +196,13 @@ namespace LZWCompression
             {
                 using (BinaryReader reader = new BinaryReader(fs))
                 {
+                    IDBits = Convert.ToInt32(reader.ReadByte());
+                    toReturnPoint++;
                     DifferentCharacters = Convert.ToInt32(reader.ReadByte());
                     toReturnPoint++;
                     for (int i = 0; i < DifferentCharacters; i++)
                     {
-                        Characters.Add(Convert.ToString(reader.ReadByte()), i + 1);
+                        DecompressedCharacters.Add(i + 1, Convert.ToString(reader.ReadByte()));
                         toReturnPoint++;
                     }
                 }
@@ -217,20 +223,18 @@ namespace LZWCompression
                     reader.ReadBytes(fromHere);
                     while (counter < fs.Length)
                     {
-                        //¿Como puedo obtener los char usando los valores de los números de la tabla
-                        //si pusiste la llave como el propio string?
-                        //ActualCadena = Characters.TryGetValue()
+                        ActualCadena = 
 
-                        //if (Characters.ContainsKey(ActualCadena))
-                        //{
-                        //    FinalBytes.Add(Convert.ToByte(Characters.TryGetValue(ActualCadena)))
-                        //    PrevActual = PrevCadena+ActualCadena;
-                        //    PrevCadena = ActualCadena; 
-                        //}
-                        //if (!Characters.ContainsKey(PrevActual))
-                        //{
-                        //    Characters.Add(PrevActual, Characters.Count + 1);
-                        //}
+                        if (Characters.ContainsKey(ActualCadena))
+                        {
+                            FinalBytes.Add(Convert.ToByte(Characters.TryGetValue(ActualCadena)))
+                            PrevActual = PrevCadena + ActualCadena;
+                            PrevCadena = ActualCadena;
+                        }
+                        if (!Characters.ContainsKey(PrevActual))
+                        {
+                            Characters.Add(PrevActual, Characters.Count + 1);
+                        }
                     }
                 }
             }
@@ -239,6 +243,25 @@ namespace LZWCompression
 
 
 
+        }
+
+        string FillIDQueue(int fromHere, string path)
+        {
+            string BinaryText;
+            using (FileStream fs = File.OpenRead(path))
+            {
+                using (BinaryReader reader = new BinaryReader(fs))
+                {
+                    int counter = 0;
+                    reader.ReadBytes(fromHere);
+                    while (counter < fs.Length)
+                    {
+
+                        counter++;
+                    }
+
+                }
+            }
         }
         #endregion
     }
