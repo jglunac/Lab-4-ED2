@@ -6,7 +6,7 @@ using System.Text;
 using HuffmanCompression;
 namespace LZWCompression
 {
-    public class LZW : ICompression
+    public class LZW : IComp
     {
         #region Properties
         string Path;
@@ -182,7 +182,7 @@ namespace LZWCompression
         #region Decompress
         public byte[] Decompress(string path, int buffer)
         {
-
+            bSize = buffer;
             int ContinuePoint = GetDifferentCharacters(path);
             FillIDQueue(ContinuePoint, path);
             GenerateTable(ContinuePoint, path);
@@ -247,7 +247,9 @@ namespace LZWCompression
 
         string FillIDQueue(int fromHere, string path)
         {
-            string BinaryText;
+            StringBuilder Binary = new StringBuilder();
+            string BinaryID;
+            byte[] Bytes;
             using (FileStream fs = File.OpenRead(path))
             {
                 using (BinaryReader reader = new BinaryReader(fs))
@@ -256,8 +258,18 @@ namespace LZWCompression
                     reader.ReadBytes(fromHere);
                     while (counter < fs.Length)
                     {
+                        Bytes = reader.ReadBytes(bSize);
 
-                        counter++;
+                        foreach (var item in Bytes)
+                        {
+                            while (Binary.Length < IDBits)
+                            {
+                                Binary.Append(Convert.ToString(Convert.ToInt32(item), 2));
+
+                            }
+                        }
+
+                        counter += bSize;
                     }
 
                 }
