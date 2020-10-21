@@ -182,6 +182,7 @@ namespace LZWCompression
         {
             int ContinuePoint = GetDifferentCharacters(path);
             GenerateTable(ContinuePoint, path);
+            return FinalBytes.ToArray();
         }
 
         int GetDifferentCharacters(string path)
@@ -205,8 +206,9 @@ namespace LZWCompression
         void GenerateTable(int fromHere, string path)
         {
             int counter = 0;
-            string PrevCadena;
+            string PrevCadena="";
             string ActualCadena = "";
+            string PrevActual="";
             using (FileStream fs = File.OpenRead(path))
             {
                 using (BinaryReader reader = new BinaryReader(fs))
@@ -222,6 +224,12 @@ namespace LZWCompression
                         //if (Characters.ContainsKey(ActualCadena))
                         //{
                         //    FinalBytes.Add(Convert.ToByte(Characters.TryGetValue(ActualCadena)))
+                        //    PrevActual = PrevCadena+ActualCadena;
+                        //    PrevCadena = ActualCadena; 
+                        //}
+                        //if (!Characters.ContainsKey(PrevActual))
+                        //{
+                        //    Characters.Add(PrevActual, Characters.Count + 1);
                         //}
                     }
                 }
