@@ -12,18 +12,17 @@ namespace TestConsole
         {
             string path = @"C:\Users\joseg\Desktop\hola.txt";
             string path2 = @"C:\Users\joseg\Desktop\comprimidowe.txt";
+            string path3 = @"C:\Users\joseg\Desktop\descomprimidowe.txt";
             LZW compression = new LZW(path);
-            byte[] FileData = compression.Compress(path,"hola", 100);
-
-            //string res = Encoding.ASCII.GetString(FileData);
-            //for (int i = 0; i < res.Length; i++)
-            //{
-            //    char aux = res[i];
-            //}   
-            byte[] DeCompressed = compression.Decompress()
+            byte[] FileData = compression.Compress(path,"hola", 100);  
             using (FileStream fs = File.Create(path2))
             {
                 fs.Write(FileData);
+            }
+            byte[] Decompressed = compression.Decompress(path2, 50);
+            using (FileStream fs = File.Create(path3))
+            {
+                fs.Write(Decompressed);
             }
         }
     }
