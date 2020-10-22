@@ -59,6 +59,11 @@ namespace LZWCompression
                     BinaryByte = binary;
                 }
             }
+            if (BinaryByte != "")
+            {
+                BinaryByte = BinaryByte.PadLeft(8, '0');
+                FinalBytes.Add(Convert.ToByte(BinaryByte, 2));
+            }
         }
 
         void GetOriginalCharacters()
@@ -211,31 +216,49 @@ namespace LZWCompression
         }
         void GenerateTable(int fromHere, string path)
         {
-            int counter = 0;
-            string PrevCadena="";
-            string ActualCadena = "";
-            string PrevActual="";
-            using (FileStream fs = File.OpenRead(path))
+            int counter = DifferentCharacters+1;
+            string PrevString="";
+            string ActualString = "";
+            string PrevPlusActualFirst="";
+            while (IDqueue.Count >0)
             {
-                using (BinaryReader reader = new BinaryReader(fs))
+                DecompressedCharacters.TryGetValue(IDqueue.Dequeue(), out ActualString);
+                if (PrevString != "")
                 {
-                    counter += fromHere;
-                    reader.ReadBytes(fromHere);
-                    while (counter < fs.Length)
+                    PrevPlusActualFirst = PrevString + ActualString.Substring(0, 1);
+                    if (!DecompressedCharacters.ContainsValue(PrevPlusActualFirst))
                     {
-                        int TargetString = IDqueue.Peek();
-                        IDqueue.Dequeue();
-                        if (DecompressedCharacters.ContainsKey(TargetString))
-                        {
-                            DecompressedCharacters.TryGetValue(TargetString, out ActualCadena);
-                            FinalBytes.Add(Convert.ToByte(ActualCadena));
-                            PrevActual = PrevActual + ActualCadena.Substring(0, 1);
-                            DecompressedCharacters.Add(DecompressedCharacters.Count + 1, PrevActual);
-                        }
-                        PrevCadena = ActualCadena;
+                        DecompressedCharacters.Add(counter, PrevPlusActualFirst);
+                        counter++;
                     }
+                    
+                }
+                PrevString = ActualString;
+                for (int i = 0; i < ActualString.Length; i++)
+                {
+                    FinalBytes.Add((byte)ActualString[i]);
                 }
             }
+            //using (FileStream fs = File.OpenRead(path))
+            //{
+            //    using (BinaryReader reader = new BinaryReader(fs))
+            //    {
+            //        counter += fromHere;
+            //        reader.ReadBytes(fromHere);
+            //        while (counter < fs.Length)
+            //        {
+            //            int TargetString = IDqueue.Dequeue();
+            //            if (DecompressedCharacters.ContainsKey(TargetString))
+            //            {
+            //                DecompressedCharacters.TryGetValue(TargetString, out ActualString);
+            //                FinalBytes.Add(Convert.ToByte(ActualString));
+            //                PrevPlusActualFirst = PrevPlusActualFirst + ActualString.Substring(0, 1);
+            //                DecompressedCharacters.Add(DecompressedCharacters.Count + 1, PrevPlusActualFirst);
+            //            }
+            //            PrevString = ActualString;
+            //        }
+            //    }
+            //}
         }
 
         void FillIDQueue(int fromHere, string path)
@@ -252,24 +275,23 @@ namespace LZWCompression
                     while (counter < fs.Length)
                     {
                         aux = reader.ReadBytes(bSize);
-                        foreach (var item in aux)
-                        {
-                            Bytes.Add(item);
-                        }
+                        //foreach (var item in aux)
+                        //{
+                        //    Bytes.Add(item);
+                        //}
 
-                        for (int i = 0; i < Bytes.Count; i++)
+                        for (int i = 0; i < aux.Length; i++)
                         {
-                            if (Binary.Length < IDBits)
+                            Binary.Append(Convert.ToString(Convert.ToInt32(aux[i]), 2));
+                            while (Binary.Length >= IDBits)
                             {
-                                Binary.Append(Convert.ToString(Convert.ToInt32(Bytes[i]), 2));
+                                IDqueue.Enqueue(Convert.ToByte(Binary.ToString(0, IDBits), 2));
+                                //string temprString = Binary.ToString().Substring(IDBits);
+                                //Binary.Clear();
+                                //Binary.Append(temprString);
+                                Binary.Remove(0, IDBits);
                             }
-                            else
-                            {
-                                IDqueue.Enqueue(Convert.ToInt32(Binary.ToString().Substring(0, IDBits)));
-                                string temprString = Binary.ToString().Substring(IDBits);
-                                Binary = new StringBuilder();
-                                Binary.Append(temprString);
-                            }
+                            
                         }
 
                         counter += bSize;
