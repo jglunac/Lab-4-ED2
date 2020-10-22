@@ -28,40 +28,61 @@ namespace API.Controllers
         [Route("compress/{name}")]
         public async Task<ActionResult> Compress(string name, [FromForm] IFormFile file)
         {
-
-            //try
-            //{
-
-
-            string originalName = file.FileName;
             string path = _env.ContentRootPath;
-            double originalSize;
-            
-            using (var Memory = new MemoryStream())
+            string OriginalName = file.FileName;
+            string uploadPath = path + @"\Uploads\" + OriginalName;
+            byte[] FileBytes;
+            try
             {
-                if (file != null && name != null)
+                if (file != null)
                 {
-                    await file.CopyToAsync(Memory);
+                    using (FileStream fs = System.IO.File.Create(uploadPath))
+                    {
+                        await file.CopyToAsync(fs);
+                    }
+                LZW Compressor = new LZW(uploadPath);
+                FileBytes = Compressor.Compress(uploadPath, OriginalName, 100);
+                return File(FileBytes, "text/plain", name + ".lzw");
                 }
                 else
                 {
                     return StatusCode(500);
                 }
-                using (FileStream stream = System.IO.File.Create(path + @"\Uploads\" + originalName))
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
+        }
+        [Route("decompress")]
+        public async Task<ActionResult> Decompress([FromForm] IFormFile file)
+        {
+            string path = _env.ContentRootPath;
+            string OriginalName = file.FileName;
+            string downloadPath = path + @"\Compressions\" + OriginalName;
+            byte[] FileBytes;
+            try
+            {
+                if (file != null)
                 {
-                    stream.Write(Memory.ToArray());
-                    stream.Close();
+                    using (FileStream fs = System.IO.File.Create(downloadPath))
+                    {
+                        await file.CopyToAsync(fs);
+                    }
+                    LZW Compressor = new LZW(downloadPath);
+                    FileBytes = Compressor.Decompress(downloadPath, 100);
+                    return File(FileBytes, "text/plain", Compressor.Name + ".lzw"); ;
                 }
-                LZW compressor = new LZW(path + @"\Uploads\" + originalName);
-                byte[] ByteArray = compressor.Compress(path + @"\Uploads\" + originalName, originalName, 100);
-                originalSize = Memory.Length;
-                double compressedSize = ByteArray.Length;
-                CustomFile result = new CustomFile();
-                result.Content = ByteArray;
-                result.ContentType = "text / plain";
-                result.FileName = name;
-                return File(result.Content, result.ContentType, result.FileName + ".lzw");
+                else
+                {
+                    return StatusCode(500);
+                }
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
             }
         }
     }
+    
 }

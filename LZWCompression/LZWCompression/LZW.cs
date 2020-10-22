@@ -15,28 +15,27 @@ namespace LZWCompression
         Dictionary<int, string> DecompressedCharacters = new Dictionary<int, string>();
         List<byte> FinalBytes = new List<byte>();
         int IDBits = 0;
-        Queue<int> IDqueue;
+        Queue<int> IDqueue = new Queue<int>();
         int DifferentCharacters;
         int bSize;
+        public string Name;
         #endregion
-
-        #region Constructor
         public LZW(string path)
         {
             Path = path;
         }
-        #endregion
 
         #region Compress
         public byte[] Compress(string path, string FileName, int bSize)
         {
             FinalBytes.Clear();
             Characters.Clear();
+            Name = FileName;
+            AddMetaName();
             IDqueue = new Queue<int>();
             GetOriginalCharacters();
             GenerateMeta();
             GetStrings();
-            
             AddIDQueue();
             return FinalBytes.ToArray();
         }
@@ -163,7 +162,7 @@ namespace LZWCompression
                         }
                         
                     }
-                    FinalBytes.Insert(0, Convert.ToByte(IDBits));
+                    FinalBytes.Insert(Name.Length+1, Convert.ToByte(IDBits));
                     //result = resultbuilder.ToString();
                 }
             }
@@ -184,6 +183,15 @@ namespace LZWCompression
                 FinalBytes.Add((byte)Convert.ToChar(item.Key));
             }
         }
+
+        void AddMetaName()
+        {
+            for (int i = 0; i < Name.Length; i++)
+            {
+                FinalBytes.Add((byte)Name[i]);
+            }
+            FinalBytes.Add(10);
+        }
         #endregion
 
         #region Decompress
@@ -194,19 +202,43 @@ namespace LZWCompression
             DecompressedCharacters.Clear();
             FinalBytes.Clear();
             IDqueue.Clear();
-            int ContinuePoint = GetDifferentCharacters(path);
+
+            int ContinuePoint = GetDifferentCharacters(path, GetMetaName(path));
             FillIDQueue(ContinuePoint, path);
             GenerateTable(ContinuePoint, path);
             return FinalBytes.ToArray();
         }
-
-        int GetDifferentCharacters(string path)
+        int GetMetaName(string path)
         {
-            int toReturnPoint = 0;
+            int w = 0;
             using (FileStream fs = File.OpenRead(path))
             {
                 using (BinaryReader reader = new BinaryReader(fs))
                 {
+                    
+                    Name = "";
+                    char nameChar;
+                    do
+                    {
+                      nameChar = Convert.ToChar(reader.ReadByte());
+                        if (nameChar != 10)
+                        {
+                            Name += nameChar.ToString();
+                        }
+                        w++;
+                    } while (nameChar != 10);
+                }
+            }
+            return w;
+        }
+        int GetDifferentCharacters(string path, int toReturn)
+        {
+            int toReturnPoint = toReturn;
+            using (FileStream fs = File.OpenRead(path))
+            {
+                using (BinaryReader reader = new BinaryReader(fs))
+                {
+                    reader.ReadBytes(toReturn);
                     IDBits = Convert.ToInt32(reader.ReadByte());
                     toReturnPoint++;
                     DifferentCharacters = Convert.ToInt32(reader.ReadByte());
