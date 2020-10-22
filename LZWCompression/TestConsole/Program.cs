@@ -20,6 +20,7 @@ namespace TestConsole
             //{
             //    char aux = res[i];
             //}   
+            byte[] DeCompressed = compression.Decompress()
             using (FileStream fs = File.Create(path2))
             {
                 fs.Write(FileData);
