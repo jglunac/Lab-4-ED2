@@ -223,33 +223,25 @@ namespace LZWCompression
                     reader.ReadBytes(fromHere);
                     while (counter < fs.Length)
                     {
-                        ActualCadena = 
-
-                        if (Characters.ContainsKey(ActualCadena))
+                        int TargetString = IDqueue.Dequeue();
+                        if (DecompressedCharacters.ContainsKey(TargetString))
                         {
-                            FinalBytes.Add(Convert.ToByte(Characters.TryGetValue(ActualCadena)))
-                            PrevActual = PrevCadena + ActualCadena;
-                            PrevCadena = ActualCadena;
+                            DecompressedCharacters.TryGetValue(TargetString, out ActualCadena);
+                            FinalBytes.Add(Convert.ToByte(ActualCadena));
+                            PrevActual = PrevActual + ActualCadena.Substring(0, 1);
+                            DecompressedCharacters.Add(DecompressedCharacters.Count + 1, PrevActual);
                         }
-                        if (!Characters.ContainsKey(PrevActual))
-                        {
-                            Characters.Add(PrevActual, Characters.Count + 1);
-                        }
+                        PrevCadena = ActualCadena;
                     }
                 }
             }
-
-
-
-
-
         }
 
-        string FillIDQueue(int fromHere, string path)
+        void FillIDQueue(int fromHere, string path)
         {
             StringBuilder Binary = new StringBuilder();
-            string BinaryID;
-            byte[] Bytes;
+            List<byte> Bytes = new List<byte>();
+            byte[] aux;
             using (FileStream fs = File.OpenRead(path))
             {
                 using (BinaryReader reader = new BinaryReader(fs))
@@ -258,14 +250,24 @@ namespace LZWCompression
                     reader.ReadBytes(fromHere);
                     while (counter < fs.Length)
                     {
-                        Bytes = reader.ReadBytes(bSize);
-
-                        foreach (var item in Bytes)
+                        aux = reader.ReadBytes(bSize);
+                        foreach (var item in aux)
                         {
-                            while (Binary.Length < IDBits)
-                            {
-                                Binary.Append(Convert.ToString(Convert.ToInt32(item), 2));
+                            Bytes.Add(item);
+                        }
 
+                        for (int i = 0; i < Bytes.Count; i++)
+                        {
+                            if (Binary.Length < IDBits)
+                            {
+                                Binary.Append(Convert.ToString(Convert.ToInt32(Bytes[i]), 2));
+                            }
+                            else
+                            {
+                                IDqueue.Enqueue(Convert.ToInt32(Binary.ToString().Substring(0, IDBits)));
+                                string temprString = Binary.ToString().Substring(IDBits);
+                                Binary = new StringBuilder();
+                                Binary.Append(temprString);
                             }
                         }
 
