@@ -187,6 +187,7 @@ namespace LZWCompression
         #region Decompress
         public byte[] Decompress(string path, int buffer)
         {
+            FinalBytes = new List<byte>();
             bSize = buffer;
             int ContinuePoint = GetDifferentCharacters(path);
             FillIDQueue(ContinuePoint, path);
@@ -207,7 +208,7 @@ namespace LZWCompression
                     toReturnPoint++;
                     for (int i = 0; i < DifferentCharacters; i++)
                     {
-                        DecompressedCharacters.Add(i + 1, Convert.ToString(reader.ReadByte()));
+                        DecompressedCharacters.Add(i + 1, Convert.ToChar(reader.ReadByte()).ToString());
                         toReturnPoint++;
                     }
                 }
@@ -282,7 +283,7 @@ namespace LZWCompression
 
                         for (int i = 0; i < aux.Length; i++)
                         {
-                            Binary.Append(Convert.ToString(Convert.ToInt32(aux[i]), 2));
+                            Binary.Append(Convert.ToString(Convert.ToInt32(aux[i]), 2).PadLeft(8,'0'));
                             while (Binary.Length >= IDBits)
                             {
                                 IDqueue.Enqueue(Convert.ToByte(Binary.ToString(0, IDBits), 2));
