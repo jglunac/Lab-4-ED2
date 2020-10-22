@@ -30,6 +30,8 @@ namespace LZWCompression
         #region Compress
         public byte[] Compress(string path, string FileName, int bSize)
         {
+            FinalBytes.Clear();
+            Characters.Clear();
             IDqueue = new Queue<int>();
             GetOriginalCharacters();
             GenerateMeta();
@@ -188,6 +190,9 @@ namespace LZWCompression
         public byte[] Decompress(string path, int buffer)
         {
             bSize = buffer;
+            DecompressedCharacters.Clear();
+            FinalBytes.Clear();
+            IDqueue.Clear();
             int ContinuePoint = GetDifferentCharacters(path);
             FillIDQueue(ContinuePoint, path);
             GenerateTable(ContinuePoint, path);
