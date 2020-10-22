@@ -223,7 +223,8 @@ namespace LZWCompression
                     reader.ReadBytes(fromHere);
                     while (counter < fs.Length)
                     {
-                        int TargetString = IDqueue.Dequeue();
+                        int TargetString = IDqueue.Peek();
+                        IDqueue.Dequeue();
                         if (DecompressedCharacters.ContainsKey(TargetString))
                         {
                             DecompressedCharacters.TryGetValue(TargetString, out ActualCadena);
