@@ -31,7 +31,11 @@ namespace API.Controllers
             string path = _env.ContentRootPath;
             string OriginalName = file.FileName;
             string uploadPath = path + @"\Uploads\" + OriginalName;
+            string downloadPath = path + @"\Compressions\" + name;
             byte[] FileBytes;
+
+            double originalSize;
+
             //try
             //{
                 if (file != null)
@@ -39,9 +43,14 @@ namespace API.Controllers
                     using (FileStream fs = System.IO.File.Create(uploadPath))
                     {
                         await file.CopyToAsync(fs);
+                        originalSize = fs.Length;
                     }
+
                 LZW Compressor = new LZW(uploadPath);
                 FileBytes = Compressor.Compress(uploadPath, OriginalName, 100);
+                double compressedSize = FileBytes.Length;
+
+                Compressor.UpdateCompressions(path, OriginalName, uploadPath, originalSize, compressedSize);
                 return File(FileBytes, "text/plain", name + ".lzw");
                 }
                 else
@@ -61,10 +70,10 @@ namespace API.Controllers
             string OriginalName = file.FileName;
             string downloadPath = path + @"\Compressions\" + OriginalName;
             byte[] FileBytes;
-            try
+            //try
+            //{
+            if (file != null)
             {
-                if (file != null)
-                {
                     using (FileStream fs = System.IO.File.Create(downloadPath))
                     {
                         await file.CopyToAsync(fs);
@@ -77,11 +86,32 @@ namespace API.Controllers
                 {
                     return StatusCode(500);
                 }
-            }
-            catch (Exception)
+            //}
+            //catch (Exception)
+            //{
+            //    return StatusCode(500);
+            //}
+        }
+
+        [HttpGet]
+        public IActionResult ReturnJSON()
+        {
+            string path = _env.ContentRootPath;
+            using (StreamReader reader = new StreamReader(path + "/CompressedFiles.json"))
             {
-                return StatusCode(500);
+                string json = reader.ReadToEnd();
+                List<LZWCompression.LZWCompression> Compressions = CompressionDeserialize(json);
+                JsonSerializer.Serialize(Compressions);
+                return Ok(Compressions);
             }
+        }
+
+        public static List<LZWCompression.LZWCompression> CompressionDeserialize(string content)
+        {
+            return JsonSerializer.Deserialize<List<LZWCompression.LZWCompression>>(content, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
         }
     }
     
