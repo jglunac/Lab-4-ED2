@@ -10,8 +10,8 @@ namespace TestConsole
     {
         static void Main(string[] args)
         {
-            //string path = @"C:\Users\brazi\Desktop\ESTRUCTURA DE DATOS II\easy test.txt";
-            string path = @"C:\Users\brazi\Desktop\hola.txt";
+            string path = @"C:\Users\brazi\Desktop\ESTRUCTURA DE DATOS II\easy test.txt";
+            //string path = @"C:\Users\brazi\Desktop\hola.txt";
             string path2 = @"C:\Users\brazi\Desktop\comprimidowe.txt";
             string path3 = @"C:\Users\brazi\Desktop\descomprimidowe.txt";
             LZW compression = new LZW(path);
@@ -25,6 +25,8 @@ namespace TestConsole
             {
                 fs.Write(Decompressed);
             }
+
+            Console.WriteLine();
         }
     }
 }

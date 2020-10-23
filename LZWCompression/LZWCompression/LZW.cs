@@ -207,7 +207,7 @@ namespace LZWCompression
         #region Decompress
         public byte[] Decompress(string path, int buffer)
         {
-            FinalBytes = new List<byte>();
+            
             bSize = buffer;
             DecompressedCharacters.Clear();
             FinalBytes.Clear();
@@ -270,26 +270,45 @@ namespace LZWCompression
             string PrevPlusActualFirst="";
             while (IDqueue.Count >0)
             {
-                //if (DecompressedCharacters.ContainsKey(IDqueue.Peek()))
-                //{
                 int prueba = IDqueue.Peek();
-                    DecompressedCharacters.TryGetValue(IDqueue.Dequeue(), out ActualString);
-                //}
-                if (PrevString != "")
+                if (DecompressedCharacters.ContainsKey(IDqueue.Peek()))
                 {
-                    PrevPlusActualFirst = PrevString + ActualString.Substring(0, 1);
-                    if (!DecompressedCharacters.ContainsValue(PrevPlusActualFirst))
+                    //if (IDqueue.Count == 13851)
+                    //{
+                    //    int hola = 1;
+                    //}
+                    
+                    DecompressedCharacters.TryGetValue(IDqueue.Dequeue(), out ActualString);
+                    if (PrevString != "")
                     {
-                        DecompressedCharacters.Add(counter, PrevPlusActualFirst);
+                        PrevPlusActualFirst = PrevString + ActualString.Substring(0, 1);
+                        if (!DecompressedCharacters.ContainsValue(PrevPlusActualFirst))
+                        {
+                            DecompressedCharacters.Add(counter, PrevPlusActualFirst);
+                            counter++;
+                        }
+
+                    }
+                    
+                }
+                else
+                {
+                    ActualString = PrevString + PrevString[0];
+                    IDqueue.Dequeue();
+                    if (!DecompressedCharacters.ContainsValue(ActualString))
+                    {
+                        DecompressedCharacters.Add(counter, ActualString);
                         counter++;
                     }
                     
                 }
                 PrevString = ActualString;
+                //Hasta aquí están iguales en texto y en diccionario
                 for (int i = 0; i < ActualString.Length; i++)
                 {
                     FinalBytes.Add((byte)ActualString[i]);
                 }
+                //Aquí ya hay más texto en la descompresión
             }
             //using (FileStream fs = File.OpenRead(path))
             //{
@@ -337,10 +356,15 @@ namespace LZWCompression
                             Binary.Append(Convert.ToString(Convert.ToInt32(aux[i]), 2).PadLeft(8,'0'));
                             while (Binary.Length >= IDBits)
                             {
-                                IDqueue.Enqueue(Convert.ToInt32(Binary.ToString(0, IDBits), 2));
-                                //string temprString = Binary.ToString().Substring(IDBits);
-                                //Binary.Clear();
-                                //Binary.Append(temprString);
+                                int ToIDqueue = Convert.ToInt32(Binary.ToString(0, IDBits), 2);
+                                if (ToIDqueue > 0)
+                                {
+                                    IDqueue.Enqueue(ToIDqueue);
+                                    //string temprString = Binary.ToString().Substring(IDBits);
+                                    //Binary.Clear();
+                                    //Binary.Append(temprString);
+                                   
+                                }
                                 Binary.Remove(0, IDBits);
                             }
                             
