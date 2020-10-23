@@ -54,11 +54,21 @@ namespace LZWCompression
                     binary = binary.Remove(0, missingBits);
                 }
                 else BinaryByte += binary;
-                if (BinaryByte.Length == 8)
+                
+                while (BinaryByte.Length>=8)
                 {
-                    FinalBytes.Add(Convert.ToByte(BinaryByte, 2));
-                    BinaryByte = binary;
+                    FinalBytes.Add(Convert.ToByte(BinaryByte.Substring(0,8), 2));
+                    
+                    if(BinaryByte.Length == 8)
+                    {
+                        BinaryByte = binary;
+                        binary = "";
+                        
+                    }
+                    else BinaryByte = BinaryByte.Remove(0, 8);
+
                 }
+                
             }
             if (BinaryByte != "")
             {
@@ -260,7 +270,11 @@ namespace LZWCompression
             string PrevPlusActualFirst="";
             while (IDqueue.Count >0)
             {
-                DecompressedCharacters.TryGetValue(IDqueue.Dequeue(), out ActualString);
+                //if (DecompressedCharacters.ContainsKey(IDqueue.Peek()))
+                //{
+                int prueba = IDqueue.Peek();
+                    DecompressedCharacters.TryGetValue(IDqueue.Dequeue(), out ActualString);
+                //}
                 if (PrevString != "")
                 {
                     PrevPlusActualFirst = PrevString + ActualString.Substring(0, 1);
@@ -323,7 +337,7 @@ namespace LZWCompression
                             Binary.Append(Convert.ToString(Convert.ToInt32(aux[i]), 2).PadLeft(8,'0'));
                             while (Binary.Length >= IDBits)
                             {
-                                IDqueue.Enqueue(Convert.ToByte(Binary.ToString(0, IDBits), 2));
+                                IDqueue.Enqueue(Convert.ToInt32(Binary.ToString(0, IDBits), 2));
                                 //string temprString = Binary.ToString().Substring(IDBits);
                                 //Binary.Clear();
                                 //Binary.Append(temprString);

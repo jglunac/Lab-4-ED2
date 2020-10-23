@@ -32,8 +32,8 @@ namespace API.Controllers
             string OriginalName = file.FileName;
             string uploadPath = path + @"\Uploads\" + OriginalName;
             byte[] FileBytes;
-            try
-            {
+            //try
+            //{
                 if (file != null)
                 {
                     using (FileStream fs = System.IO.File.Create(uploadPath))
@@ -48,11 +48,11 @@ namespace API.Controllers
                 {
                     return StatusCode(500);
                 }
-            }
-            catch (Exception)
-            {
-                return StatusCode(500);
-            }
+            //}
+            //catch (Exception)
+            //{
+            //    return StatusCode(500);
+            //}
         }
         [Route("decompress")]
         public async Task<ActionResult> Decompress([FromForm] IFormFile file)
