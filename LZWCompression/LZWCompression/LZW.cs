@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using HuffmanCompression;
-using System.Text.Json;
 namespace LZWCompression
 {
     public class LZW : IComp
@@ -73,7 +72,7 @@ namespace LZWCompression
             }
             if (BinaryByte != "")
             {
-                BinaryByte = BinaryByte.PadLeft(8, '0');
+                BinaryByte = BinaryByte.PadRight(8, '0');
                 FinalBytes.Add(Convert.ToByte(BinaryByte, 2));
             }
         }
@@ -352,62 +351,6 @@ namespace LZWCompression
 
                 }
             }
-        }
-        #endregion
-
-        #region Json
-        public void UpdateCompressions(string path, string name, string route, double originalSize, double CompressedSize)
-        {
-            double compressionFactor, compressionRatio, reductionPercentage;
-
-            compressionRatio = CompressedSize / originalSize;
-            compressionFactor = originalSize / CompressedSize;
-            reductionPercentage = compressionRatio * 100;
-
-            LZWCompression compression = new LZWCompression();
-            compression.OriginalName = name;
-            compression.CompressedFilePath = route;
-            compression.CompressionRatio = compressionRatio;
-            compression.CompressionFactor = compressionFactor;
-            compression.ReductionPercentage = reductionPercentage;
-
-            path += @"\CompressedFiles.json";
-
-            List<LZWCompression> PreviousFile = new List<LZWCompression>();
-            if (File.Exists(path))
-            {
-                using (FileStream fs = File.OpenRead(path))
-                {
-                    string file;
-                    MemoryStream memory = new MemoryStream();
-                    fs.CopyTo(memory);
-                    file = Encoding.ASCII.GetString(memory.ToArray());
-                    if (file != "")
-                    {
-                        PreviousFile = DeserializeCompression(file);
-                    }
-                }
-            }
-            PreviousFile.Add(compression);
-            using (StreamWriter writer = new StreamWriter(path))
-            {
-                writer.Write(WriteJson(PreviousFile));
-            }
-
-        }
-        public string WriteJson(List<LZWCompression> list)
-        {
-            return JsonSerializer.Serialize(list, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
-        }
-        public static List<LZWCompression> DeserializeCompression(string content)
-        {
-            return JsonSerializer.Deserialize<List<LZWCompression>>(content, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
         }
         #endregion
     }
