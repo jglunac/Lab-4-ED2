@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Lab-3-ED2\HuffmanCompression\HuffmanCompression\HuffmanCompression.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="HuffmanCompression">
       <HintPath>..\..\..\Lab-3-ED2\HuffmanCompression\HuffmanCompression\bin\Debug\netcoreapp3.1\HuffmanCompression.dll</HintPath>
     </Reference>
