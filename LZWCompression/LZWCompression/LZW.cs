@@ -208,7 +208,6 @@ namespace LZWCompression
         #region Decompress
         public byte[] Decompress(string path, int buffer)
         {
-            
             bSize = buffer;
             DecompressedCharacters.Clear();
             FinalBytes.Clear();
@@ -221,10 +220,10 @@ namespace LZWCompression
         }
         int GetMetaName(string path)
         {
-            int w = 0;
-            using (FileStream fs = File.OpenRead(path))
+            int ReadingPoint = 0;
+            using (FileStream fileStream = File.OpenRead(path))
             {
-                using (BinaryReader reader = new BinaryReader(fs))
+                using (BinaryReader reader = new BinaryReader(fileStream))
                 {
                     
                     Name = "";
@@ -236,11 +235,11 @@ namespace LZWCompression
                         {
                             Name += nameChar.ToString();
                         }
-                        w++;
+                        ReadingPoint++;
                     } while (nameChar != 10);
                 }
             }
-            return w;
+            return ReadingPoint;
         }
         int GetDifferentCharacters(string path, int toReturn)
         {
@@ -274,11 +273,6 @@ namespace LZWCompression
                 int prueba = IDqueue.Peek();
                 if (DecompressedCharacters.ContainsKey(IDqueue.Peek()))
                 {
-                    //if (IDqueue.Count == 13851)
-                    //{
-                    //    int hola = 1;
-                    //}
-                    
                     DecompressedCharacters.TryGetValue(IDqueue.Dequeue(), out ActualString);
                     if (PrevString != "")
                     {
@@ -288,9 +282,7 @@ namespace LZWCompression
                             DecompressedCharacters.Add(counter, PrevPlusActualFirst);
                             counter++;
                         }
-
-                    }
-                    
+                    }   
                 }
                 else
                 {
@@ -301,7 +293,6 @@ namespace LZWCompression
                         DecompressedCharacters.Add(counter, ActualString);
                         counter++;
                     }
-                    
                 }
                 PrevString = ActualString;
                 //Hasta aquí están iguales en texto y en diccionario
@@ -311,33 +302,12 @@ namespace LZWCompression
                 }
                 //Aquí ya hay más texto en la descompresión
             }
-            //using (FileStream fs = File.OpenRead(path))
-            //{
-            //    using (BinaryReader reader = new BinaryReader(fs))
-            //    {
-            //        counter += fromHere;
-            //        reader.ReadBytes(fromHere);
-            //        while (counter < fs.Length)
-            //        {
-            //            int TargetString = IDqueue.Dequeue();
-            //            if (DecompressedCharacters.ContainsKey(TargetString))
-            //            {
-            //                DecompressedCharacters.TryGetValue(TargetString, out ActualString);
-            //                FinalBytes.Add(Convert.ToByte(ActualString));
-            //                PrevPlusActualFirst = PrevPlusActualFirst + ActualString.Substring(0, 1);
-            //                DecompressedCharacters.Add(DecompressedCharacters.Count + 1, PrevPlusActualFirst);
-            //            }
-            //            PrevString = ActualString;
-            //        }
-            //    }
-            //}
         }
-
         void FillIDQueue(int fromHere, string path)
         {
             StringBuilder Binary = new StringBuilder();
             List<byte> Bytes = new List<byte>();
-            byte[] aux;
+            byte[] ByteArray;
             using (FileStream fs = File.OpenRead(path))
             {
                 using (BinaryReader reader = new BinaryReader(fs))
@@ -346,39 +316,26 @@ namespace LZWCompression
                     reader.ReadBytes(fromHere);
                     while (counter < fs.Length)
                     {
-                        aux = reader.ReadBytes(bSize);
-                        //foreach (var item in aux)
-                        //{
-                        //    Bytes.Add(item);
-                        //}
-
-                        for (int i = 0; i < aux.Length; i++)
+                        ByteArray = reader.ReadBytes(bSize);
+                        for (int i = 0; i < ByteArray.Length; i++)
                         {
-                            Binary.Append(Convert.ToString(Convert.ToInt32(aux[i]), 2).PadLeft(8,'0'));
+                            Binary.Append(Convert.ToString(Convert.ToInt32(ByteArray[i]), 2).PadLeft(8,'0'));
                             while (Binary.Length >= IDBits)
                             {
                                 int ToIDqueue = Convert.ToInt32(Binary.ToString(0, IDBits), 2);
                                 if (ToIDqueue > 0)
                                 {
                                     IDqueue.Enqueue(ToIDqueue);
-                                    //string temprString = Binary.ToString().Substring(IDBits);
-                                    //Binary.Clear();
-                                    //Binary.Append(temprString);
-                                   
                                 }
                                 Binary.Remove(0, IDBits);
                             }
-                            
                         }
-
                         counter += bSize;
                     }
-
                 }
             }
         }
         #endregion
-
         #region Json
         public void UpdateCompressions(string path, string name, string route, double originalSize, double CompressedSize)
         {
