@@ -11,7 +11,6 @@ namespace LZWCompression
     {
         #region Properties
         string Path;
-        //El diccionario puede ser <string, int>?
         Dictionary<string, int> Characters = new Dictionary<string, int>();
         Dictionary<int, string> DecompressedCharacters = new Dictionary<int, string>();
         List<byte> FinalBytes = new List<byte>();
@@ -85,20 +84,15 @@ namespace LZWCompression
                 {
                     int counter = 0;
                     string _string;
-                    
                     int i = 1;
                     while (counter < fs.Length)
                     {
                         _string = Convert.ToChar(reader.ReadByte()).ToString();
                         if (!Characters.ContainsKey(_string))
                         {
-                            //Character character = new Character();
-                            //character.Value = _string;
-                            //character.Key = i;
                             Characters.Add(_string, i);
                             i++;
                         }
-                        
                         counter++;
                     }
                 }
@@ -112,24 +106,16 @@ namespace LZWCompression
                 using (BinaryReader reader = new BinaryReader(fs))
                 {
                     int counter = 0;
-                    //string CurrentString = Convert.ToChar(reader.ReadByte()).ToString();
                     StringBuilder CurrentString = new StringBuilder();
                     CurrentString.Append(Convert.ToChar(reader.ReadByte()).ToString());
-                    //StringBuilder resultbuilder = new StringBuilder();
                     int i = Characters.Count + 1;
                     int ExistentStringID = 0;
-                    //Character AuxCharacter = new Character();
-                    //string result;
                     while (counter < fs.Length)
                     {
-                        //CurrentString = new StringBuilder();
                         if (Characters.ContainsKey(CurrentString.ToString()))
                         {
                             counter++;
-                            //CurrentString.Append(CurrentString);
                             Characters.TryGetValue(CurrentString.ToString(), out ExistentStringID);
-                            
-                            //AuxCharacter = character;
                             if (counter<fs.Length)
                             {
                                 CurrentString.Append(Convert.ToChar(reader.ReadByte()).ToString());
@@ -137,8 +123,6 @@ namespace LZWCompression
                             else
                             {
                                 string Binary = Convert.ToString(ExistentStringID, 2);
-                                //Binary.PadLeft(8, '0');
-                                //byte TargetByte = Convert.ToByte(Binary, 2);
 
                                 if (Binary.Length > IDBits)
                                 {
@@ -147,49 +131,32 @@ namespace LZWCompression
                                 IDqueue.Enqueue(ExistentStringID);
 
                             }
-                            //CurrentString = CurrentString.ToString();
-
                         }
                         else
                         {
                             string Binary = Convert.ToString(ExistentStringID, 2);
-                            //byte TargetByte = Convert.ToByte(Binary,2);
-                            //FinalBytes.Add(TargetByte);
                             if (Binary.Length > IDBits)
                             {
                                 IDBits = Binary.Length;
                             }
                             IDqueue.Enqueue(ExistentStringID);
-                            //resultbuilder.Append(Convert.ToString(AuxCharacter.Key, 2));
-                            //Character character = new Character();
-                            //character.Value = CurrentString;
-                            //character.Key = i;
                             Characters.Add(CurrentString.ToString(), i);
                             string LastChar = CurrentString.ToString(CurrentString.Length - 1, 1);
                             CurrentString.Clear();
                             CurrentString.Append(LastChar);
                             i++;
                         }
-                        
                     }
                     FinalBytes.Insert(Name.Length+1, Convert.ToByte(IDBits));
-                    //result = resultbuilder.ToString();
                 }
             }
         }
 
         void GenerateMeta()
         {
-            //string DifferentChars = Convert.ToString(Characters.Count, 2);
-            //DifferentChars.PadLeft(8, '0');
-            //byte toMeta = Convert.ToByte(DifferentChars, 2);
-            //FinalBytes.Add(toMeta);
-           
             FinalBytes.Add(Convert.ToByte(Characters.Count));
             foreach (var item in Characters)
             {
-                //char baseChar = Convert.ToChar(item.Value.Value);
-                //byte baseByte = Convert.ToByte(baseChar);
                 FinalBytes.Add((byte)Convert.ToChar(item.Key));
             }
         }
