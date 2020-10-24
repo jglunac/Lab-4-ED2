@@ -67,7 +67,6 @@ namespace LZWCompression
                         
                     }
                     else BinaryByte = BinaryByte.Remove(0, 8);
-
                 }
                 
             }
@@ -85,18 +84,18 @@ namespace LZWCompression
                 using (BinaryReader reader = new BinaryReader(fs))
                 {
                     int counter = 0;
-                    string Cadena;
+                    string _string;
                     
                     int i = 1;
                     while (counter < fs.Length)
                     {
-                        Cadena = Convert.ToChar(reader.ReadByte()).ToString();
-                        if (!Characters.ContainsKey(Cadena))
+                        _string = Convert.ToChar(reader.ReadByte()).ToString();
+                        if (!Characters.ContainsKey(_string))
                         {
                             //Character character = new Character();
-                            //character.Value = Cadena;
+                            //character.Value = _string;
                             //character.Key = i;
-                            Characters.Add(Cadena, i);
+                            Characters.Add(_string, i);
                             i++;
                         }
                         
