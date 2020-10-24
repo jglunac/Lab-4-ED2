@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using HuffmanCompression;
 namespace LZWCompression
 {
-    public class LZW : IComp
+    public class LZW : ICompression
     {
         #region Properties
         string Path;
@@ -375,6 +376,62 @@ namespace LZWCompression
 
                 }
             }
+        }
+        #endregion
+
+        #region Json
+        public void UpdateCompressions(string path, string name, string route, double originalSize, double CompressedSize)
+        {
+            double compressionFactor, compressionRatio, reductionPercentage;
+
+            compressionRatio = CompressedSize / originalSize;
+            compressionFactor = originalSize / CompressedSize;
+            reductionPercentage = compressionRatio * 100;
+
+            LZWCompression compression = new LZWCompression();
+            compression.OriginalName = name;
+            compression.CompressedFilePath = route;
+            compression.CompressionRatio = compressionRatio;
+            compression.CompressionFactor = compressionFactor;
+            compression.ReductionPercentage = reductionPercentage;
+
+            path += @"\CompressedFiles.json";
+
+            List<LZWCompression> PreviousFile = new List<LZWCompression>();
+            if (File.Exists(path))
+            {
+                using (FileStream fs = File.OpenRead(path))
+                {
+                    string file;
+                    MemoryStream memory = new MemoryStream();
+                    fs.CopyTo(memory);
+                    file = Encoding.ASCII.GetString(memory.ToArray());
+                    if (file != "")
+                    {
+                        PreviousFile = DeserializeCompression(file);
+                    }
+                }
+            }
+            PreviousFile.Add(compression);
+            using (StreamWriter writer = new StreamWriter(path))
+            {
+                writer.Write(WriteJson(PreviousFile));
+            }
+
+        }
+        public string WriteJson(List<LZWCompression> list)
+        {
+            return JsonSerializer.Serialize(list, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+        }
+        public static List<LZWCompression> DeserializeCompression(string content)
+        {
+            return JsonSerializer.Deserialize<List<LZWCompression>>(content, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
         }
         #endregion
     }

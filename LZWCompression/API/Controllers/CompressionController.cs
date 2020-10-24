@@ -36,8 +36,8 @@ namespace API.Controllers
 
             double originalSize;
 
-            //try
-            //{
+            try
+            {
                 if (file != null)
                 {
                     using (FileStream fs = System.IO.File.Create(uploadPath))
@@ -57,22 +57,23 @@ namespace API.Controllers
                 {
                     return StatusCode(500);
                 }
-            //}
-            //catch (Exception)
-            //{
-            //    return StatusCode(500);
-            //}
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
         }
         [Route("decompress")]
         public async Task<ActionResult> Decompress([FromForm] IFormFile file)
         {
             string path = _env.ContentRootPath;
             string OriginalName = file.FileName;
+            OriginalName = OriginalName.Substring(0, OriginalName.Length - 4);
             string downloadPath = path + @"\Compressions\" + OriginalName;
             byte[] FileBytes;
-            //try
-            //{
-            if (file != null)
+            try
+            {
+                if (file != null)
             {
                     using (FileStream fs = System.IO.File.Create(downloadPath))
                     {
@@ -80,17 +81,17 @@ namespace API.Controllers
                     }
                     LZW Compressor = new LZW(downloadPath);
                     FileBytes = Compressor.Decompress(downloadPath, 100);
-                    return File(FileBytes, "text/plain", Compressor.Name + ".lzw"); ;
+                    return File(FileBytes, "text/plain", Compressor.Name); ;
                 }
                 else
                 {
                     return StatusCode(500);
                 }
-            //}
-            //catch (Exception)
-            //{
-            //    return StatusCode(500);
-            //}
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
         }
 
         [HttpGet]

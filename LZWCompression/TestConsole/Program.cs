@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using LZWCompression;
 
@@ -10,22 +11,31 @@ namespace TestConsole
     {
         static void Main(string[] args)
         {
-            string path = @"C:\Users\brazi\Desktop\ESTRUCTURA DE DATOS II\easy test.txt";
-            //string path = @"C:\Users\brazi\Desktop\hola.txt";
-            string path2 = @"C:\Users\brazi\Desktop\comprimidowe.txt";
-            string path3 = @"C:\Users\brazi\Desktop\descomprimidowe.txt";
+            string path = @"C:\Users\joseg\Desktop\Pruebas LZW\Archivos\cuento.txt";
+            string path2 = @"C:\Users\joseg\Desktop\Pruebas LZW\Descompresiones\cuento.txt";
             LZW compression = new LZW(path);
-            byte[] FileData = compression.Compress(path,"hola", 100);  
-            using (FileStream fs = File.Create(path2))
+            byte[] byte1;
+            byte[] byte2;
+            using (FileStream fs = File.OpenRead(path2))
             {
-                fs.Write(FileData);
+                using (FileStream fs2 = File.OpenRead(path))
+                {
+                    using (BinaryReader reader = new BinaryReader(fs))
+                    {
+                        using (BinaryReader reader2 = new BinaryReader(fs2))
+                        {
+                            int counter = 0;
+                            while (counter<fs.Length)
+                            {
+                                byte1 = reader.ReadBytes(100);
+                                byte2 = reader2.ReadBytes(100);
+                                counter += 100;
+                                Console.WriteLine(byte1.SequenceEqual(byte2));
+                            }
+                        }
+                    }
+                }
             }
-            byte[] Decompressed = compression.Decompress(path2, 50);
-            using (FileStream fs = File.Create(path3))
-            {
-                fs.Write(Decompressed);
-            }
-
             Console.WriteLine();
         }
     }
